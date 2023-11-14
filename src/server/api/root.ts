@@ -1,5 +1,7 @@
-import { postRouter } from "~/server/api/routers/post";
-import { createTRPCRouter } from "~/server/api/trpc";
+import { postRouter } from "~/server/api/modules/post";
+import { siteRouter } from "~/server/api/modules/site";
+import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { z } from "zod";
 
 /**
  * This is the primary router for your server.
@@ -8,6 +10,14 @@ import { createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   post: postRouter,
+  site: siteRouter,
+  hello: publicProcedure
+    .input(z.object({ text: z.string() }))
+    .query(({ input }) => {
+      return {
+        greeting: `Hello ${input.text}`,
+      };
+    }),
 });
 
 // export type definition of API

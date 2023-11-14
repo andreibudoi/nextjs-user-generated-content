@@ -30,8 +30,8 @@ model Post {
 
 model Site {
   id          Int      @id @default(autoincrement())
-  name        String
-  description String
+  name        String?
+  description String?
   subdomain   String   @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
