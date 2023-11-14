@@ -4,6 +4,7 @@ import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { getServerAuthSession } from "~/server/auth";
 import ConfigSite from "./_components/config-site";
+import YourWebsite from "./_components/your-website";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -13,7 +14,7 @@ export default async function Home() {
   return (
     <main
       className="flex min-h-screen flex-col items-center justify-center">
-      <div className="container flex flex-col gap-12 px-4 py-16 w-full max-w-2xl">
+      <div className="container flex flex-col gap-4 px-4 py-16 w-full max-w-2xl">
         <div className="flex flex-col gap-2">
           <p className="text-2xl">
             {hello ? hello.greeting : "Loading tRPC query..."}
@@ -27,7 +28,12 @@ export default async function Home() {
           </Button>
         </div>
 
-        {session && <ConfigSite/>}
+        {session &&
+          <>
+            <YourWebsite/>
+            <ConfigSite/>
+          </>
+        }
       </div>
     </main>
   );

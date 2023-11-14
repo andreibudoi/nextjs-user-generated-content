@@ -2,19 +2,29 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { type CreateSiteDto, createSiteDto } from "~/server/api/modules/site/site.dto";
 import { Button } from "~/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "~/components/ui/dialog"
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/ui/use-toast";
-import { env } from "~/env.mjs";
+import { useRouter } from "next/navigation";
 
 export default function ConfigSite() {
   const { toast } = useToast()
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   const utils = api.useUtils()
   const { data: userSite, isLoading } = api.site.getSiteByUserId.useQuery()
@@ -30,8 +40,10 @@ export default function ConfigSite() {
         description: e.message
       })
     },
-    onSettled: () =>
-      utils.site.getSiteByUserId.invalidate()
+    onSettled: async () => {
+      await utils.site.getSiteByUserId.invalidate()
+      router.refresh();
+    }
   });
   const { mutateAsync: updateSite } = api.site.update.useMutation({
     onSuccess: () => {
@@ -45,8 +57,10 @@ export default function ConfigSite() {
         description: e.message
       })
     },
-    onSettled: () =>
-      utils.site.getSiteByUserId.invalidate()
+    onSettled: async () => {
+      await utils.site.getSiteByUserId.invalidate()
+      router.refresh();
+    }
   });
 
   const form = useForm<CreateSiteDto>({
@@ -75,72 +89,82 @@ export default function ConfigSite() {
   async function onSubmit(values: CreateSiteDto) {
     const id = userSite?.id
     try {
-      return id ? await updateSite({ id, ...values }) : await createSite(values)
+      if (!!id) {
+        await updateSite({ id, ...values });
+      } else {
+        await createSite(values);
+      }
+      setOpen(false);
     } catch (_) {
     }
   }
 
-  const protocol = env.NEXT_PUBLIC_DOMAIN_ROOT === 'localhost:3000' ? 'http://' : 'https://'
-  const userHref = `${protocol}${userSite?.subdomain}.${env.NEXT_PUBLIC_DOMAIN_ROOT}`
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="subdomain"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subdomain</FormLabel>
-              <FormControl>
-                <Input placeholder="your-site" {...field} />
-              </FormControl>
-              <FormMessage/>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Your site" {...field} />
-              </FormControl>
-              <FormMessage/>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Input placeholder="Description of your site" {...field} />
-              </FormControl>
-              <FormMessage/>
-            </FormItem>
-          )}
-        />
-        <div className='flex justify-between flex-wrap gap-4'>
-          <Button type="submit" loading={form.formState.isSubmitting}>Submit</Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">Configure Website</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Configure Website</DialogTitle>
+          <DialogDescription>
+            Make changes to your website here. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="subdomain"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subdomain</FormLabel>
+                  <FormControl>
+                    <Input placeholder="your-site" {...field} />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your site" {...field} />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Description of your site" {...field} />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
 
-          {!!userSite && <div className='flex gap-2'>
-            <Button asChild variant='link'>
-              <Link
-                href={userHref}
-                target='_blank'
-                className='text-xl'
+            <DialogFooter>
+              <Button
+                type="submit"
+                loading={form.formState.isSubmitting}
+                disabled={!form.formState.isDirty}
               >
-                {`Your website: ${userHref}`}
-              </Link>
-            </Button>
-          </div>}
-        </div>
-      </form>
-    </Form>
+                Save changes
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   )
 }
