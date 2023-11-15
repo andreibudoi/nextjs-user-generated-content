@@ -12,6 +12,8 @@ export default async function Home() {
   const { user } = session ?? {}
   const hello = await api.hello.query({ text: user?.name ?? "from tRPC" });
 
+  const site = session ? await api.site.getSiteByUserId.query() : null;
+
   return (
     <main
       className="flex min-h-screen flex-col items-center justify-center">
@@ -33,7 +35,7 @@ export default async function Home() {
           <>
             <YourWebsite/>
             <ConfigSite/>
-            <CreatePost />
+            <CreatePost siteId={site?.id}/>
           </>
         }
       </div>

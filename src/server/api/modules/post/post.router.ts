@@ -10,7 +10,9 @@ export const postRouter = createTRPCRouter({
         data: {
           name: input.name,
           content: input.content,
-          createdBy: { connect: { id: ctx.session.user.id } },
+          slug: input.slug,
+          siteId: input.siteId,
+          createdById: ctx.session.user.id,
         },
       });
     }),
@@ -22,12 +24,21 @@ export const postRouter = createTRPCRouter({
     });
   }),
 
-  getAllPostsByCreatedById: publicProcedure.input(z.object({
-    createdById: z.string()
-  })).query(({ ctx, input }) => {
-    return ctx.db.post.findMany({
-      orderBy: { createdAt: "desc" },
-      where: { createdBy: { id: input.createdById } },
-    });
-  })
+  getAllPostsBySiteKey: publicProcedure
+    .input(z.object({ siteKey: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: { site: { subdomain: input.siteKey } },
+      });
+    }),
+
+  getPost: publicProcedure
+    .input(z.object({ siteKey: z.string(), slug: z.string() }))
+    .query(({ ctx, input }) => {
+        return ctx.db.post.findFirst({
+          where: { slug: input.slug, site: { subdomain: input.siteKey } }
+        })
+      }
+    )
 });

@@ -14,11 +14,13 @@ export default async function Home({ params }: {
     notFound();
   }
 
-  const posts = await api.post.getAllPostsByCreatedById.query({ createdById: site.createdById })
+  const posts = await api.post.getAllPostsBySiteKey.query({ siteKey })
 
   if (posts.length === 0) {
     return <div>No posts yet</div>
   }
 
-  return <div>{posts.map(post => <Link href={`/${post.id}`} key={post.id}>{post.name}</Link>)}</div>
+  return <div className='flex flex-col gap-2'>
+    {posts.map(post => <Link href={`/${post.slug}`} key={post.id}>{post.name}</Link>)}
+  </div>
 }

@@ -12,7 +12,7 @@ export default async function YourWebsite() {
   const userHref = getUserSiteHref(site)
 
   const latestPost = await api.post.getLatest.query()
-  const latestPostHref = `${userHref}/${latestPost?.id}`
+  const latestPostHref = `${userHref}/${latestPost?.slug}`
 
   return (
     <div className='w-full flex flex-col'>

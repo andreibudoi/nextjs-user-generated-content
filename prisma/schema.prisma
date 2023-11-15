@@ -16,21 +16,25 @@ datasource db {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name      String
-  content   String
+  content   String   @db.LongText
+  slug      String   @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  createdBy   User   @relation(fields: [createdById], references: [id])
+  site        Site?   @relation(fields: [siteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  siteId      String?
+  createdBy   User    @relation(fields: [createdById], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdById String
 
-  @@index([name])
+  @@unique([slug, siteId])
   @@index([createdById])
+  @@index([siteId])
 }
 
 model Site {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String?
   description String?
   subdomain   String   @unique(map: "unique_subdomain")
@@ -39,6 +43,7 @@ model Site {
 
   createdBy   User   @relation(fields: [createdById], references: [id])
   createdById String @unique
+  posts       Post[]
 
   @@index([subdomain])
   @@index([createdById])
@@ -82,8 +87,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  sites         Site[]
   posts         Post[]
-  site          Site?
 }
 
 model VerificationToken {
