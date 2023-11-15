@@ -25,6 +25,12 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const searchParams = req.nextUrl.searchParams.toString();
+  // Get the pathname of the request (e.g. /, /about, /blog/first-post)
+  const path = `${pathname}${
+    searchParams.length > 0 ? `?${searchParams}` : ""
+  }`;
+
   const siteKey = host.replace(`.${env.NEXT_PUBLIC_DOMAIN_ROOT}`, "");
   const isUserSite = siteKey !== env.NEXT_PUBLIC_DOMAIN_ROOT;
   const isForbidden = pathname.startsWith(`/${HIDDEN_ROUTE_PREFIX}`);
@@ -36,7 +42,7 @@ export default function middleware(req: NextRequest) {
   // rewrite everything else to `/[domain]/[slug] dynamic route
   if (isUserSite) {
     // return NextResponse.next();
-    return NextResponse.rewrite(new URL(`/${HIDDEN_ROUTE_PREFIX}/${siteKey}`, req.url));
+    return NextResponse.rewrite(new URL(`/${HIDDEN_ROUTE_PREFIX}/${siteKey}${path}`, req.url));
   }
   return NextResponse.next();
 }

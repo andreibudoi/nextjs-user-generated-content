@@ -7,7 +7,7 @@ import { Prisma } from '@prisma/client'
 export const siteRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createSiteDto)
-    .mutation(async({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
         return await ctx.db.site.create({
           data: {
@@ -20,12 +20,14 @@ export const siteRouter = createTRPCRouter({
       } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
           // The .code property can be accessed in a type-safe manner
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Subdomain already exists',
-            // optional: pass the original error to retain stack trace
-            cause: e,
-          });
+          if (e.code === 'P2002') {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Subdomain already exists',
+              // optional: pass the original error to retain stack trace
+              cause: e,
+            });
+          }
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -38,7 +40,7 @@ export const siteRouter = createTRPCRouter({
   update: protectedProcedure
     .input(updateSiteDto).mutation(async ({ ctx, input }) => {
       try {
-        return ctx.db.site.update({
+        return await ctx.db.site.update({
           where: {
             id: input.id
           },
@@ -52,12 +54,14 @@ export const siteRouter = createTRPCRouter({
       } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
           // The .code property can be accessed in a type-safe manner
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Subdomain already exists',
-            // optional: pass the original error to retain stack trace
-            cause: e,
-          });
+          if (e.code === 'P2002') {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Subdomain already exists',
+              // optional: pass the original error to retain stack trace
+              cause: e,
+            });
+          }
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',

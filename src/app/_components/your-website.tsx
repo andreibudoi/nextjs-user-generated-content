@@ -1,7 +1,7 @@
 import { api } from "~/trpc/server";
-import { env } from "~/env.mjs";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
+import { getUserSiteHref } from "~/helpers";
 
 export default async function YourWebsite() {
   const site = await api.site.getSiteByUserId.query()
@@ -9,18 +9,31 @@ export default async function YourWebsite() {
     return;
   }
 
-  const protocol = env.NEXT_PUBLIC_DOMAIN_ROOT === 'localhost:3000' ? 'http://' : 'https://'
-  const userHref = `${protocol}${site.subdomain}.${env.NEXT_PUBLIC_DOMAIN_ROOT}`
+  const userHref = getUserSiteHref(site)
+
+  const latestPost = await api.post.getLatest.query()
+  const latestPostHref = `${userHref}/${latestPost?.id}`
 
   return (
-    <Button asChild variant='link'>
-      <Link
-        href={userHref}
-        target='_blank'
-        className='text-xl'
-      >
-        {`Your website: ${userHref}`}
-      </Link>
-    </Button>
+    <div className='w-full flex flex-col'>
+      <Button asChild variant='link'>
+        <Link
+          href={userHref}
+          target='_blank'
+          className='text-xl'
+        >
+          {`Your website: ${userHref}`}
+        </Link>
+      </Button>
+      {!!latestPost && <Button asChild variant='link'>
+        <Link
+          href={latestPostHref}
+          target='_blank'
+          className='text-xl'
+        >
+          {`Latest post: ${latestPost.name}`}
+        </Link>
+      </Button>}
+    </div>
   )
 }

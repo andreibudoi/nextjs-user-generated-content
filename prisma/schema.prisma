@@ -18,6 +18,7 @@ datasource db {
 model Post {
   id        Int      @id @default(autoincrement())
   name      String
+  content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -32,7 +33,7 @@ model Site {
   id          Int      @id @default(autoincrement())
   name        String?
   description String?
-  subdomain   String   @unique
+  subdomain   String   @unique(map: "unique_subdomain")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

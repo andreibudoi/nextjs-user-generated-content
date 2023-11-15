@@ -2,7 +2,7 @@ import { api } from "~/trpc/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-export default async function Home({ params }: {
+export default async function BlogPost({ params }: {
   params: {
     siteKey: string
   }

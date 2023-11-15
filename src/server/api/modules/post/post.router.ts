@@ -1,20 +1,15 @@
+import { createTRPCRouter, protectedProcedure, publicProcedure, } from "~/server/api/trpc";
+import { createPostDto } from "./post.dto";
 import { z } from "zod";
-
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "~/server/api/trpc";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
+    .input(createPostDto)
     .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      return ctx.db.post.create({
+      return await ctx.db.post.create({
         data: {
           name: input.name,
+          content: input.content,
           createdBy: { connect: { id: ctx.session.user.id } },
         },
       });
@@ -26,4 +21,13 @@ export const postRouter = createTRPCRouter({
       where: { createdBy: { id: ctx.session.user.id } },
     });
   }),
+
+  getAllPostsByCreatedById: publicProcedure.input(z.object({
+    createdById: z.string()
+  })).query(({ ctx, input }) => {
+    return ctx.db.post.findMany({
+      orderBy: { createdAt: "desc" },
+      where: { createdBy: { id: input.createdById } },
+    });
+  })
 });

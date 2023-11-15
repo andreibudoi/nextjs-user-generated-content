@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { type CreateSiteDto, createSiteDto } from "~/server/api/modules/site/site.dto";
 import { Button } from "~/components/ui/button"
@@ -16,23 +17,23 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "~/components/ui/dialog"
+} from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/ui/use-toast";
-import { useRouter } from "next/navigation";
 
 export default function ConfigSite() {
   const { toast } = useToast()
   const router = useRouter();
   const [open, setOpen] = useState(false);
-
   const utils = api.useUtils()
+
   const { data: userSite, isLoading } = api.site.getSiteByUserId.useQuery()
   const { mutateAsync: createSite } = api.site.create.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
       })
+      setOpen(false);
     },
     onError: (e) => {
       toast({
@@ -50,6 +51,7 @@ export default function ConfigSite() {
       toast({
         title: "Success",
       })
+      setOpen(false);
     },
     onError: (e) => {
       toast({
@@ -84,17 +86,18 @@ export default function ConfigSite() {
   }, [userSite, reset])
 
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return <Button variant="outline" disabled>Configure Website</Button>;
+  }
 
   async function onSubmit(values: CreateSiteDto) {
     const id = userSite?.id
     try {
       if (!!id) {
-        await updateSite({ id, ...values });
+        return await updateSite({ id, ...values });
       } else {
-        await createSite(values);
+        return await createSite(values);
       }
-      setOpen(false);
     } catch (_) {
     }
   }

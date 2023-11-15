@@ -1,4 +1,4 @@
-import {z} from "zod";
+import { z } from "zod";
 
 export const createSiteDto =
   z.object({
@@ -7,7 +7,7 @@ export const createSiteDto =
     description: z.string().max(50).optional()
   })
 
-export type CreateSiteDto =  z.infer<typeof createSiteDto>
+export type CreateSiteDto = z.infer<typeof createSiteDto>
 
 export const updateSiteDto =
   z.object({
