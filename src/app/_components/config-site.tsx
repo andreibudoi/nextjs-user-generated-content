@@ -111,7 +111,7 @@ export default function ConfigSite() {
         <DialogHeader>
           <DialogTitle>Configure Website</DialogTitle>
           <DialogDescription>
-            Make changes to your website here. Click save when you're done.
+            {"Make changes to your website here. Click save when you're done."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

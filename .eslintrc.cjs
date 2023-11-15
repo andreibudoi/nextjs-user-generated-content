@@ -23,11 +23,12 @@ const config = {
         fixStyle: "inline-type-imports",
       },
     ],
-    "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "@typescript-eslint/prefer-nullish-coalescing": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", {argsIgnorePattern: "^_"}],
     "@typescript-eslint/no-misused-promises": [
       2,
       {
-        checksVoidReturn: { attributes: false },
+        checksVoidReturn: {attributes: false},
       },
     ],
   },

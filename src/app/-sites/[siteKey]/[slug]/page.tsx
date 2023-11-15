@@ -2,6 +2,7 @@ import { api } from "~/trpc/server";
 import { notFound } from "next/navigation";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
+import { JSONContent } from "@tiptap/core";
 
 export default async function BlogPost({ params }: {
   params: {
@@ -17,7 +18,8 @@ export default async function BlogPost({ params }: {
     notFound();
   }
   const { name, content } = post;
-  const renderedHTML = generateHTML(JSON.parse(content), [
+  const contentJson = JSON.parse(content) as JSONContent;
+  const renderedHTML = generateHTML(contentJson, [
     StarterKit.configure({
       heading: {
         levels: [1, 2, 3],
